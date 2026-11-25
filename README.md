@@ -9,15 +9,27 @@ Prototipo web del sistema integral de gestión de inventario, ventas y distribuc
 | `index.html` | Única entrada del sitio: contenedor `#app` y carga de `src/main.ts`. |
 | `src/main.ts` | Punto de entrada: importa estilos, crea el modelo con los datos de ejemplo e inicia el controlador. |
 | `src/model/` | Modelo (seis gestores, tipos, errores, dataset y fachada `Sistema`). |
-| `src/view/` | Vistas: `layout.ts` (estructura común), un archivo TS por sección y `styles.css`. |
+| `src/view/` | Vistas: `layout.ts` (estructura común), un archivo TS por sección, `formatos.ts` y `styles.css`. |
 | `src/controller/` | Controlador: `router.ts` (navegación por hash) y `acciones.ts` (interacciones). |
 | `docs/` | Justificación de las estructuras de datos por funcionalidad. |
 | `vite.config.ts` | Configuración de Vite y del plugin `vite-plugin-singlefile`, que incrusta CSS y JS en el HTML. |
 | `tsconfig.json` | Configuración de TypeScript. |
-| `public/` | Recursos estáticos (`favicon.svg`, `icons.svg`). |
 | `dist/` | Salida del build: un único `index.html` autocontenido listo para entregar. |
 
-La interfaz conserva el diseño de la versión «bonita» y permite recorrer las seis áreas del negocio mediante rutas internas (`#/productos`, `#/ventas`, …). El recorrido de pedidos sigue el ciclo `Nuevo → Confirmado → Preparando → Listo → Despachado`, con referencias como `P-2026-311`.
+La interfaz conserva el diseño de la versión «bonita» y permite recorrer las seis áreas del negocio mediante rutas internas (`#/productos`, `#/ventas`, …). **Todas las cifras y tablas se generan desde `Sistema`**: cambiar un dato en `src/model/datos.ts` cambia lo que se ve, sin editar el marcado. El recorrido de pedidos sigue el ciclo `Nuevo → Confirmado → Preparando → Listo → Despachado`, con referencias como `P-2026-311`.
+
+## Interacciones conectadas al modelo
+
+| Acción | Operación de negocio |
+| --- | --- |
+| Completar venta | Descuenta el stock, registra la venta y emite un evento. |
+| Avanzar pedido | Aplica la siguiente transición válida del ciclo y deja constancia en la bitácora. |
+| Nuevo pedido | Encola un pedido en estado `Nuevo` con correlativo automático. |
+| Preparar transferencia | Valida el stock de origen y encola la solicitud FIFO. |
+| Planificar ruta | Calcula la ruta más corta con Dijkstra y registra el despacho. |
+| Exportar registro | Descarga la bitácora append-only en CSV.
+
+Cada operación muestra un aviso y vuelve a renderizar la vista activa con los datos actualizados.
 
 ## Modelo de dominio (equivalente al de la versión CLI)
 

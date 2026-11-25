@@ -1,4 +1,4 @@
-/** Controlador de navegación: interpreta el hash y renderiza la vista activa. */
+/** Controlador de navegación: interpreta el hash y renderiza la vista activa con el modelo. */
 
 import type { Seccion } from '../model/tipos';
 import type { Sistema } from '../model/sistema';
@@ -12,7 +12,7 @@ import { vistaDistribucion } from '../view/distribucion';
 import { vistaSeguimiento } from '../view/seguimiento';
 import { instalarAcciones } from './acciones';
 
-const VISTAS: Record<Seccion, () => string> = {
+const VISTAS: Record<Seccion, (sistema: Sistema) => string> = {
   resumen: vistaDashboard,
   productos: vistaProductos,
   ubicaciones: vistaUbicaciones,
@@ -38,11 +38,14 @@ export function iniciarRouter(sistema: Sistema): void {
   const app = document.querySelector<HTMLDivElement>('#app');
   if (!app) throw new Error('No se encontró el contenedor #app');
 
-  const renderizar = (): void => {
+  let renderizar: () => void = () => {};
+  // La delegación se instala una sola vez: el render reemplaza el contenido de #app.
+  instalarAcciones(app, sistema, () => renderizar());
+
+  renderizar = (): void => {
     const { seccion, foco } = leerHash();
-    app.innerHTML = renderShell(VISTAS[seccion](), seccion);
+    app.innerHTML = renderShell(VISTAS[seccion](sistema), seccion);
     document.title = `${TITULOS[seccion]} · Los Manguitos`;
-    instalarAcciones(app, sistema);
 
     if (foco) {
       requestAnimationFrame(() => {

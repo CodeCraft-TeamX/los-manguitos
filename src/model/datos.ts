@@ -23,14 +23,16 @@ export const cifras = {
   pedidosPorAtender: 14,
   entregasEnCurso: 6,
   ventasSemana: 14820.4,
+  tendenciaDia: 12.8,
+  tendenciaSemana: 8.4,
 };
 
 export const productos: Producto[] = [
-  { sku: 'PR-001', nombre: 'Mango Tommy', categoria: 'Frutas frescas', ubicacion: 'CENTRAL', unidad: 'kg', existencias: 12, minimo: 25, inicial: 'M', thumb: 'mango' },
-  { sku: 'PR-008', nombre: 'Limón pérsico', categoria: 'Frutas frescas', ubicacion: 'SUC-CENTRO', unidad: 'cajas', existencias: 8, minimo: 20, inicial: 'L', thumb: 'lime' },
-  { sku: 'PR-024', nombre: 'Néctar de mango', categoria: 'Procesados', ubicacion: 'CENTRAL', unidad: 'uds.', existencias: 16, minimo: 30, inicial: 'N', thumb: 'honey' },
-  { sku: 'PR-015', nombre: 'Aguacate nacional', categoria: 'Frutas frescas', ubicacion: 'SUC-SANTA-ANA', unidad: 'kg', existencias: 74, minimo: 20, inicial: 'A', thumb: 'avocado' },
-  { sku: 'PR-031', nombre: 'Pulpa de mango', categoria: 'Procesados', ubicacion: 'CENTRAL', unidad: 'uds.', existencias: 46, minimo: 18, inicial: 'P', thumb: 'tomato' },
+  { sku: 'PR-001', nombre: 'Mango Tommy', categoria: 'Frutas frescas', ubicacion: 'CENTRAL', unidad: 'kg', existencias: 12, minimo: 25, precio: 2.4, inicial: 'M', thumb: 'mango' },
+  { sku: 'PR-008', nombre: 'Limón pérsico', categoria: 'Frutas frescas', ubicacion: 'SUC-CENTRO', unidad: 'cajas', existencias: 8, minimo: 20, precio: 3.2, inicial: 'L', thumb: 'lime' },
+  { sku: 'PR-024', nombre: 'Néctar de mango', categoria: 'Procesados', ubicacion: 'CENTRAL', unidad: 'uds.', existencias: 16, minimo: 30, precio: 1.5, inicial: 'N', thumb: 'honey' },
+  { sku: 'PR-015', nombre: 'Aguacate nacional', categoria: 'Frutas frescas', ubicacion: 'SUC-SANTA-ANA', unidad: 'kg', existencias: 74, minimo: 20, precio: 2.8, inicial: 'A', thumb: 'avocado' },
+  { sku: 'PR-031', nombre: 'Pulpa de mango', categoria: 'Procesados', ubicacion: 'CENTRAL', unidad: 'uds.', existencias: 46, minimo: 18, precio: 4.1, inicial: 'P', thumb: 'tomato' },
 ];
 
 export const movimientos: Movimiento[] = [
@@ -87,9 +89,15 @@ export const conexiones: Array<[string, string, number]> = [
 ];
 
 export const rutas: Ruta[] = [
-  { id: 'R-04', recorrido: 'Bodega central → Santa Ana', paradas: 3, conductor: 'José Ramírez', salida: '11:30 a. m.', estado: 'Preparada' },
-  { id: 'R-03', recorrido: 'Bodega central → San Salvador', paradas: 4, conductor: 'Pedro Molina', salida: '09:15 a. m.', estado: 'En curso' },
-  { id: 'R-02', recorrido: 'Bodega central → La Libertad', paradas: 2, conductor: 'Ana Cruz', salida: '08:40 a. m.', estado: 'En curso' },
+  { id: 'R-04', destino: 'SUC-SANTA-ANA', recorrido: 'Bodega central → Santa Ana', paradas: 3, conductor: 'José Ramírez', salida: '11:30 a. m.', estado: 'Preparada' },
+  { id: 'R-03', destino: 'SUC-CENTRO', recorrido: 'Bodega central → San Salvador', paradas: 4, conductor: 'Pedro Molina', salida: '09:15 a. m.', estado: 'En curso' },
+  { id: 'R-02', destino: 'PUERTO-LA-LIBERTAD', recorrido: 'Bodega central → La Libertad', paradas: 2, conductor: 'Ana Cruz', salida: '08:40 a. m.', estado: 'En curso' },
+];
+
+/** Carrito del panel de venta rápida; cantidades de demostración. */
+export const ventaRapida: Array<{ sku: string; cantidad: number }> = [
+  { sku: 'PR-001', cantidad: 2 },
+  { sku: 'PR-024', cantidad: 3 },
 ];
 
 export const eventos: Evento[] = [

@@ -19,6 +19,7 @@ export interface Producto {
   unidad: string;
   existencias: number;
   minimo: number;
+  precio: number;
   inicial: string;
   thumb: string;
 }
@@ -91,6 +92,7 @@ export interface Pedido {
 
 export interface Ruta {
   id: string;
+  destino: string;
   recorrido: string;
   paradas: number;
   conductor: string;

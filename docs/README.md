@@ -15,6 +15,8 @@ La versión web conserva el dataset visual de la interfaz «bonita» (`PR-001` M
 
 `src/model/sistema.ts` coordina los seis gestores; `src/controller/` es la interfaz (navegación por hash y acciones) y `src/model/datos.ts` carga el dataset de demostración.
 
+Las vistas (`src/view/*.ts`) reciben `Sistema` y generan tablas, tarjetas y métricas a partir de los gestores: no hay cifras pegadas en el marcado. Las operaciones de la interfaz llaman a los métodos de `Sistema` (`registrarVenta`, `crearPedido`, `avanzarPedido`, `solicitarTransferencia`, `planificarRuta`), que validan, mutan las estructuras y emiten un evento inmutable en `RegistroOperaciones`. `src/view/formatos.ts` centraliza el formato de monedas, estados e iconos.
+
 ## Principios comunes
 
 - Toda estructura responde una necesidad real del negocio; no se incluye una sola «por cumplir el requisito».

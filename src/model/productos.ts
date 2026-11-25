@@ -42,6 +42,10 @@ export class GestorProductos {
     return [...this.catalogo.values()];
   }
 
+  listarCategorias(): string[] {
+    return [...this.categorias.keys()];
+  }
+
   registrarMovimiento(
     sku: string,
     tipo: Movimiento['tipo'],
