@@ -18,7 +18,8 @@ export class GestorProductos {
     if (this.proveedores.has(id)) {
       throw new ValidacionError(`El proveedor '${id}' ya existe`);
     }
-    const limpio: Proveedor = { id, nombre, contacto: proveedor.contacto.trim() };
+    const contacto = normalizarTelefono(proveedor.contacto);
+    const limpio: Proveedor = { id, nombre, contacto };
     this.proveedores.set(id, limpio);
     return limpio;
   }
@@ -122,4 +123,16 @@ export class GestorProductos {
     }
     return nombres;
   }
+}
+
+export function normalizarTelefono(crudo: string): string {
+  const limpio = crudo.trim();
+  if (/[^0-9\s-]/.test(limpio)) {
+    throw new ValidacionError('El teléfono solo debe contener números (formato XXXX-XXXX)');
+  }
+  const digitos = limpio.replace(/\D/g, '');
+  if (digitos.length !== 8) {
+    throw new ValidacionError('El teléfono debe tener exactamente 8 dígitos (formato XXXX-XXXX)');
+  }
+  return `${digitos.slice(0, 4)}-${digitos.slice(4)}`;
 }

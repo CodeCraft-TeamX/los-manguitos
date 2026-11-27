@@ -31,6 +31,11 @@ export function instalarAcciones(
 ): void {
   const actualizarFiltro = (evento: Event): void => {
     const control = evento.target as HTMLInputElement | HTMLSelectElement | null;
+    if (evento.type === 'input' && control instanceof HTMLInputElement && control.name === 'provContacto') {
+      const digitos = control.value.replace(/\D/g, '').slice(0, 8);
+      control.value = digitos.length > 4 ? `${digitos.slice(0, 4)}-${digitos.slice(4)}` : digitos;
+      return;
+    }
     const clave = control?.dataset?.filter as keyof EstadoUI | undefined;
     if (!control || !clave || !(clave in estado)) return;
     if (evento.type === 'input' && control.tagName === 'SELECT') return;
