@@ -45,7 +45,7 @@ function cabecera(seccion: Seccion): string {
   const acciones = seccion === 'resumen'
     ? '<button class="icon-button" aria-label="Notificaciones">♧<i class="notification-dot"></i></button>'
     : '<span class="user-mini">LM</span>';
-  return `<div class="breadcrumb">${ruta} <span>/</span> <strong>${TITULOS[seccion]}</strong></div><div class="topbar-actions"><span class="live-status"><i></i> Sistema al día</span><span class="top-divider"></span><span class="today">MARTES, 24 NOV 2026</span>${acciones}</div>`;
+  return `<div class="breadcrumb">${ruta} <span>/</span> <strong>${TITULOS[seccion]}</strong></div><div class="topbar-actions"><span class="live-status"><i></i> Sistema al día</span><span class="top-divider"></span><span class="today">JUEVES, 26 NOV 2026</span>${acciones}</div>`;
 }
 
 /** Devuelve el documento completo con la sección solicitada en el área principal. */

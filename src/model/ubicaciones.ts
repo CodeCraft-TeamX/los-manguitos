@@ -6,7 +6,8 @@ import type { Transferencia, Ubicacion } from './tipos';
 export class GestorUbicaciones {
   private readonly ubicaciones = new Map<string, Ubicacion>();
   private readonly stock = new Map<string, Map<string, number>>();
-  private readonly transferencias: Transferencia[] = [];
+  private transferencias: Transferencia[] = [];
+  private cabeza = 0;
 
   registrarUbicacion(ubicacion: Ubicacion): Ubicacion {
     if (this.ubicaciones.has(ubicacion.id)) {
@@ -86,14 +87,28 @@ export class GestorUbicaciones {
   }
 
   procesarSiguienteTransferencia(): Transferencia {
-    const transferencia = this.transferencias.shift();
-    if (!transferencia) throw new ErrorDeNegocio('No hay transferencias pendientes');
+    if (this.cabeza >= this.transferencias.length) {
+      throw new ErrorDeNegocio('No hay transferencias pendientes');
+    }
+    const transferencia = this.transferencias[this.cabeza];
+    const disponible = this.consultarStock(transferencia.origen, transferencia.sku);
+    if (disponible < transferencia.cantidad) {
+      throw new StockInsuficiente(
+        `Ya no hay stock suficiente para '${transferencia.id}' en '${transferencia.origen}' (disponible: ${disponible})`,
+      );
+    }
+    this.cabeza++;
+    if (this.cabeza > 64 && this.cabeza * 2 >= this.transferencias.length) {
+      this.transferencias = this.transferencias.slice(this.cabeza);
+      this.cabeza = 0;
+    }
     this.ajustarStock(transferencia.origen, transferencia.sku, -transferencia.cantidad);
     this.ajustarStock(transferencia.destino, transferencia.sku, transferencia.cantidad);
+    transferencia.estado = 'Completada';
     return transferencia;
   }
 
   transferenciasPendientes(): Transferencia[] {
-    return [...this.transferencias];
+    return this.transferencias.slice(this.cabeza);
   }
 }

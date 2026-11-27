@@ -11,11 +11,12 @@ import { vistaPedidos } from '../view/pedidos';
 import { vistaDistribucion } from '../view/distribucion';
 import { vistaSeguimiento } from '../view/seguimiento';
 import { instalarAcciones } from './acciones';
+import { crearEstadoUI, type EstadoUI } from './estado';
 
-const VISTAS: Record<Seccion, (sistema: Sistema) => string> = {
-  resumen: vistaDashboard,
+const VISTAS: Record<Seccion, (sistema: Sistema, estado: EstadoUI) => string> = {
+  resumen: (sistema) => vistaDashboard(sistema),
   productos: vistaProductos,
-  ubicaciones: vistaUbicaciones,
+  ubicaciones: (sistema) => vistaUbicaciones(sistema),
   ventas: vistaVentas,
   pedidos: vistaPedidos,
   distribucion: vistaDistribucion,
@@ -38,14 +39,31 @@ export function iniciarRouter(sistema: Sistema): void {
   const app = document.querySelector<HTMLDivElement>('#app');
   if (!app) throw new Error('No se encontró el contenedor #app');
 
+  const estado = crearEstadoUI();
   let renderizar: () => void = () => {};
   // La delegación se instala una sola vez: el render reemplaza el contenido de #app.
-  instalarAcciones(app, sistema, () => renderizar());
+  instalarAcciones(app, sistema, estado, () => renderizar());
 
   renderizar = (): void => {
+    const activo = document.activeElement as HTMLInputElement | null;
+    const filtroActivo = activo?.dataset?.filter;
+    const seleccionInicio = activo?.selectionStart ?? null;
+    const seleccionFin = activo?.selectionEnd ?? null;
+
     const { seccion, foco } = leerHash();
-    app.innerHTML = renderShell(VISTAS[seccion](sistema), seccion);
+    app.innerHTML = renderShell(VISTAS[seccion](sistema, estado), seccion);
     document.title = `${TITULOS[seccion]} · Los Manguitos`;
+
+    if (filtroActivo) {
+      const campo = app.querySelector<HTMLInputElement>(`[data-filter="${filtroActivo}"]`);
+      if (campo) {
+        campo.focus();
+        if (seleccionInicio !== null && seleccionFin !== null && campo.type === 'search') {
+          campo.setSelectionRange(seleccionInicio, seleccionFin);
+        }
+      }
+      return;
+    }
 
     if (foco) {
       requestAnimationFrame(() => {

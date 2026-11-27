@@ -16,12 +16,15 @@ export function vistaDashboard(sistema: Sistema): string {
   const [ventasEntero, ventasDecimal] = partesDinero(sistema.ventas.totalVendido());
   const [semanaEntero, semanaDecimal] = partesDinero(cifras.ventasSemana);
   const productos = sistema.productos.listarProductos();
-  const bajos = productos.filter((producto) => producto.existencias < producto.minimo);
+  const bajos = productos.filter((producto) => sistema.stockProducto(producto.sku) < producto.minimo);
   const pendientes = sistema.pedidos.pedidosPendientes().length;
   const rutas = sistema.logistica.listarRutas();
   const enCurso = rutas.filter((ruta) => ruta.estado === 'En curso').length;
 
-  const stock = bajos.map((producto) => `<div class="stock-item"><span class="product-thumb ${producto.thumb}">${producto.inicial}</span><span class="stock-name"><strong>${esc(producto.nombre)}</strong><small>${esc(producto.categoria)} · ${esc(sistema.nombreUbicacion(producto.ubicacion))}</small></span><span class="stock-qty"><strong>${numero(producto.existencias)} <small>${esc(producto.unidad)}</small></strong><small class="low-label">Mínimo: ${numero(producto.minimo)} ${esc(producto.unidad)}</small></span><span class="stock-alert">Bajo</span></div>`).join('');
+  const stock = bajos.map((producto) => {
+    const existencias = sistema.stockProducto(producto.sku);
+    return `<div class="stock-item"><span class="product-thumb ${producto.thumb}">${producto.inicial}</span><span class="stock-name"><strong>${esc(producto.nombre)}</strong><small>${esc(producto.categoria)} · ${esc(sistema.nombreUbicacion(producto.ubicacion))}</small></span><span class="stock-qty"><strong>${numero(existencias)} <small>${esc(producto.unidad)}</small></strong><small class="low-label">Mínimo: ${numero(producto.minimo)} ${esc(producto.unidad)}</small></span><span class="stock-alert">Bajo</span></div>`;
+  }).join('');
 
   const actividad = [...sistema.seguimiento.ultimosEventos(3)].reverse().map((evento) => {
     const icono = iconoEvento(evento.tipo);

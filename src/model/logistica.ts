@@ -3,6 +3,46 @@
 import { ErrorDeNegocio, NoEncontrado, ValidacionError } from './errores';
 import type { Entrega, Ruta } from './tipos';
 
+class MinHeap {
+  private readonly datos: Array<[number, string]> = [];
+
+  get size(): number {
+    return this.datos.length;
+  }
+
+  push(distancia: number, nodo: string): void {
+    this.datos.push([distancia, nodo]);
+    let idx = this.datos.length - 1;
+    while (idx > 0) {
+      const padre = (idx - 1) >> 1;
+      if (this.datos[padre][0] <= this.datos[idx][0]) break;
+      [this.datos[padre], this.datos[idx]] = [this.datos[idx], this.datos[padre]];
+      idx = padre;
+    }
+  }
+
+  pop(): [number, string] {
+    const min = this.datos[0];
+    const ultimo = this.datos.pop()!;
+    if (this.datos.length > 0) {
+      this.datos[0] = ultimo;
+      let idx = 0;
+      const len = this.datos.length;
+      while (true) {
+        const izq = idx * 2 + 1;
+        const der = izq + 1;
+        let menor = idx;
+        if (izq < len && this.datos[izq][0] < this.datos[menor][0]) menor = izq;
+        if (der < len && this.datos[der][0] < this.datos[menor][0]) menor = der;
+        if (menor === idx) break;
+        [this.datos[idx], this.datos[menor]] = [this.datos[menor], this.datos[idx]];
+        idx = menor;
+      }
+    }
+    return min;
+  }
+}
+
 export class RedLogistica {
   private readonly grafo = new Map<string, Map<string, number>>();
   private readonly entregas = new Map<string, Entrega>();
@@ -27,32 +67,26 @@ export class RedLogistica {
     return new Map(this.grafo.get(nodo));
   }
 
-  /** Dijkstra con cola de prioridad simple (orden lineal sobre los nodos pendientes). */
+  /** Dijkstra con min-heap binario: O((V + E) log V). */
   rutaMasCorta(origen: string, destino: string): string[] {
     this.validarNodo(origen);
     this.validarNodo(destino);
     const distancias = new Map<string, number>([...this.grafo.keys()].map((nodo) => [nodo, Infinity]));
     const anteriores = new Map<string, string>();
-    const pendientes = new Set(this.grafo.keys());
+    const cola = new MinHeap();
     distancias.set(origen, 0);
+    cola.push(0, origen);
 
-    while (pendientes.size > 0) {
-      let actual: string | undefined;
-      let menor = Infinity;
-      for (const nodo of pendientes) {
-        const distancia = distancias.get(nodo) ?? Infinity;
-        if (distancia < menor) {
-          menor = distancia;
-          actual = nodo;
-        }
-      }
-      if (actual === undefined || actual === destino) break;
-      pendientes.delete(actual);
+    while (cola.size > 0) {
+      const [distancia, actual] = cola.pop();
+      if (distancia > (distancias.get(actual) ?? Infinity)) continue;
+      if (actual === destino) break;
       for (const [vecino, peso] of this.grafo.get(actual) ?? []) {
-        const candidata = menor + peso;
+        const candidata = distancia + peso;
         if (candidata < (distancias.get(vecino) ?? Infinity)) {
           distancias.set(vecino, candidata);
           anteriores.set(vecino, actual);
+          cola.push(candidata, vecino);
         }
       }
     }
@@ -67,6 +101,19 @@ export class RedLogistica {
       ruta.unshift(anterior);
     }
     return ruta;
+  }
+
+  /** Suma las distancias de un camino válido en el grafo. */
+  distanciaRuta(camino: string[]): number {
+    let total = 0;
+    for (let i = 0; i < camino.length - 1; i++) {
+      const peso = this.grafo.get(camino[i])?.get(camino[i + 1]);
+      if (peso === undefined) {
+        throw new ErrorDeNegocio(`No hay conexión directa entre '${camino[i]}' y '${camino[i + 1]}'`);
+      }
+      total += peso;
+    }
+    return total;
   }
 
   /** Enumera rutas simples con DFS recursivo, controlando ciclos y profundidad. */

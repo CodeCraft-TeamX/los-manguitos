@@ -1,12 +1,37 @@
 /** Funcionalidad 1: catálogo, categorías jerárquicas e historial de movimientos. */
 
 import { NoEncontrado, ValidacionError } from './errores';
-import type { Movimiento, Producto } from './tipos';
+import type { Movimiento, Producto, Proveedor } from './tipos';
 
 export class GestorProductos {
+  private readonly proveedores = new Map<string, Proveedor>();
   private readonly catalogo = new Map<string, Producto>();
   private readonly historial = new Map<string, Movimiento[]>();
   private readonly categorias = new Map<string, string[]>();
+
+  registrarProveedor(proveedor: Proveedor): Proveedor {
+    const id = proveedor.id.trim();
+    const nombre = proveedor.nombre.trim();
+    if (!id || !nombre) {
+      throw new ValidacionError('El proveedor requiere identificador y nombre');
+    }
+    if (this.proveedores.has(id)) {
+      throw new ValidacionError(`El proveedor '${id}' ya existe`);
+    }
+    const limpio: Proveedor = { id, nombre, contacto: proveedor.contacto.trim() };
+    this.proveedores.set(id, limpio);
+    return limpio;
+  }
+
+  consultarProveedor(id: string): Proveedor {
+    const proveedor = this.proveedores.get(id);
+    if (!proveedor) throw new NoEncontrado(`Proveedor '${id}' no encontrado`);
+    return proveedor;
+  }
+
+  listarProveedores(): Proveedor[] {
+    return [...this.proveedores.values()];
+  }
 
   registrarCategoria(nombre: string, padre?: string): void {
     if (!nombre.trim()) throw new ValidacionError('La categoría no puede estar vacía');
@@ -21,11 +46,23 @@ export class GestorProductos {
   }
 
   registrarProducto(producto: Producto): Producto {
+    if (!producto.sku.trim() || !producto.nombre.trim()) {
+      throw new ValidacionError('El producto requiere SKU y nombre');
+    }
     if (this.catalogo.has(producto.sku)) {
       throw new ValidacionError(`El producto '${producto.sku}' ya existe`);
     }
     if (!this.categorias.has(producto.categoria)) {
       throw new NoEncontrado(`Categoría '${producto.categoria}' no registrada`);
+    }
+    if (producto.proveedorId) {
+      this.consultarProveedor(producto.proveedorId);
+    }
+    if (!Number.isFinite(producto.precio) || producto.precio <= 0) {
+      throw new ValidacionError('El precio debe ser mayor que cero');
+    }
+    if (!Number.isInteger(producto.minimo) || producto.minimo < 0) {
+      throw new ValidacionError('El stock mínimo debe ser un entero mayor o igual a cero');
     }
     this.catalogo.set(producto.sku, producto);
     this.historial.set(producto.sku, []);

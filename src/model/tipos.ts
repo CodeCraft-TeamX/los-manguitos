@@ -11,6 +11,12 @@ export type Seccion =
 
 export type Tono = 'green' | 'orange' | 'blue' | 'violet';
 
+export interface Proveedor {
+  id: string;
+  nombre: string;
+  contacto: string;
+}
+
 export interface Producto {
   sku: string;
   nombre: string;
@@ -22,6 +28,7 @@ export interface Producto {
   precio: number;
   inicial: string;
   thumb: string;
+  proveedorId?: string;
 }
 
 export interface Movimiento {
@@ -58,6 +65,12 @@ export interface Cliente {
   tipo: 'frecuente' | 'minorista';
 }
 
+export interface VentaItem {
+  sku: string;
+  cantidad: number;
+  ubicacion: string;
+}
+
 export interface Venta {
   id: string;
   clienteId: string;
@@ -68,6 +81,7 @@ export interface Venta {
   total: number;
   hora: string;
   cancelada: boolean;
+  items?: VentaItem[];
 }
 
 /** Estados del ciclo de atención, en el orden permitido por el negocio. */

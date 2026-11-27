@@ -11,11 +11,17 @@ import {
   type Movimiento,
   type Pedido,
   type Producto,
+  type Proveedor,
   type Ruta,
   type Transferencia,
   type Ubicacion,
   type Venta,
 } from './tipos';
+
+export const proveedores: Proveedor[] = [
+  { id: 'PROV-01', nombre: 'Finca El Paraíso', contacto: '7890-1122' },
+  { id: 'PROV-02', nombre: 'Procesadora del Valle', contacto: '7890-3344' },
+];
 
 export const cifras = {
   ventasHoy: 2486.5,
@@ -28,11 +34,11 @@ export const cifras = {
 };
 
 export const productos: Producto[] = [
-  { sku: 'PR-001', nombre: 'Mango Tommy', categoria: 'Frutas frescas', ubicacion: 'CENTRAL', unidad: 'kg', existencias: 12, minimo: 25, precio: 2.4, inicial: 'M', thumb: 'mango' },
-  { sku: 'PR-008', nombre: 'Limón pérsico', categoria: 'Frutas frescas', ubicacion: 'SUC-CENTRO', unidad: 'cajas', existencias: 8, minimo: 20, precio: 3.2, inicial: 'L', thumb: 'lime' },
-  { sku: 'PR-024', nombre: 'Néctar de mango', categoria: 'Procesados', ubicacion: 'CENTRAL', unidad: 'uds.', existencias: 16, minimo: 30, precio: 1.5, inicial: 'N', thumb: 'honey' },
-  { sku: 'PR-015', nombre: 'Aguacate nacional', categoria: 'Frutas frescas', ubicacion: 'SUC-SANTA-ANA', unidad: 'kg', existencias: 74, minimo: 20, precio: 2.8, inicial: 'A', thumb: 'avocado' },
-  { sku: 'PR-031', nombre: 'Pulpa de mango', categoria: 'Procesados', ubicacion: 'CENTRAL', unidad: 'uds.', existencias: 46, minimo: 18, precio: 4.1, inicial: 'P', thumb: 'tomato' },
+  { sku: 'PR-001', nombre: 'Mango Tommy', categoria: 'Frutas frescas', ubicacion: 'CENTRAL', unidad: 'kg', existencias: 12, minimo: 25, precio: 2.4, inicial: 'M', thumb: 'mango', proveedorId: 'PROV-01' },
+  { sku: 'PR-008', nombre: 'Limón pérsico', categoria: 'Cítricos', ubicacion: 'SUC-CENTRO', unidad: 'cajas', existencias: 8, minimo: 20, precio: 3.2, inicial: 'L', thumb: 'lime', proveedorId: 'PROV-01' },
+  { sku: 'PR-024', nombre: 'Néctar de mango', categoria: 'Néctares', ubicacion: 'CENTRAL', unidad: 'uds.', existencias: 16, minimo: 30, precio: 1.5, inicial: 'N', thumb: 'honey', proveedorId: 'PROV-02' },
+  { sku: 'PR-015', nombre: 'Aguacate nacional', categoria: 'Frutas frescas', ubicacion: 'SUC-SANTA-ANA', unidad: 'kg', existencias: 74, minimo: 20, precio: 2.8, inicial: 'A', thumb: 'avocado', proveedorId: 'PROV-01' },
+  { sku: 'PR-031', nombre: 'Pulpa de mango', categoria: 'Procesados', ubicacion: 'CENTRAL', unidad: 'uds.', existencias: 46, minimo: 18, precio: 4.1, inicial: 'P', thumb: 'tomato', proveedorId: 'PROV-02' },
 ];
 
 export const movimientos: Movimiento[] = [
@@ -50,9 +56,9 @@ export const ubicaciones: Ubicacion[] = [
 ];
 
 export const transferencias: Transferencia[] = [
-  { id: 'TR-2026-019', origen: 'CENTRAL', destino: 'SUC-SANTA-ANA', sku: 'PR-008', cantidad: 24, estado: 'En tránsito' },
-  { id: 'TR-2026-018', origen: 'CENTRAL', destino: 'SUC-CENTRO', sku: 'PR-001', cantidad: 12, estado: 'En tránsito' },
   { id: 'TR-2026-017', origen: 'CENTRAL', destino: 'SUC-SAN-MIGUEL', sku: 'PR-024', cantidad: 8, estado: 'Preparada' },
+  { id: 'TR-2026-018', origen: 'CENTRAL', destino: 'SUC-CENTRO', sku: 'PR-001', cantidad: 12, estado: 'En tránsito' },
+  { id: 'TR-2026-019', origen: 'CENTRAL', destino: 'SUC-SANTA-ANA', sku: 'PR-008', cantidad: 24, estado: 'En tránsito' },
 ];
 
 export const clientes: Cliente[] = [

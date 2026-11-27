@@ -14,7 +14,8 @@ const TRANSICIONES: Record<EstadoPedido, EstadoPedido[]> = {
 
 export class GestorPedidos {
   private readonly pedidos = new Map<string, Pedido>();
-  private readonly cola: Pedido[] = [];
+  private cola: Pedido[] = [];
+  private cabeza = 0;
   private readonly historial = new Map<string, EstadoPedido[]>();
 
   registrarPedido(pedido: Pedido): Pedido {
@@ -34,9 +35,18 @@ export class GestorPedidos {
   }
 
   atenderSiguiente(): Pedido {
-    const pedido = this.cola.shift();
-    if (!pedido) throw new ErrorDeNegocio('No hay pedidos pendientes de atención');
-    this.cambiarEstado(pedido.id, EstadoPedido.Preparando);
+    while (this.cabeza < this.cola.length && this.cola[this.cabeza].estado !== EstadoPedido.Nuevo) {
+      this.cabeza++;
+    }
+    if (this.cabeza >= this.cola.length) {
+      throw new ErrorDeNegocio('No hay pedidos pendientes de atención');
+    }
+    const pedido = this.cola[this.cabeza++];
+    if (this.cabeza > 64 && this.cabeza * 2 >= this.cola.length) {
+      this.cola = this.cola.slice(this.cabeza);
+      this.cabeza = 0;
+    }
+    this.cambiarEstado(pedido.id, EstadoPedido.Confirmado);
     return pedido;
   }
 
@@ -60,7 +70,7 @@ export class GestorPedidos {
   }
 
   pedidosPendientes(): Pedido[] {
-    return [...this.cola];
+    return this.cola.slice(this.cabeza).filter((pedido) => pedido.estado === EstadoPedido.Nuevo);
   }
 
   todosLosPedidos(): Pedido[] {
