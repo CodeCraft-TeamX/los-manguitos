@@ -12,6 +12,16 @@ const TRANSICIONES: Record<EstadoPedido, EstadoPedido[]> = {
   [EstadoPedido.Cancelado]: [],
 };
 
+const SIGUIENTE_ESTADO: Partial<Record<EstadoPedido, EstadoPedido>> = {
+  [EstadoPedido.Nuevo]: EstadoPedido.Confirmado,
+  [EstadoPedido.Confirmado]: EstadoPedido.Preparando,
+  [EstadoPedido.Preparando]: EstadoPedido.Listo,
+  [EstadoPedido.Listo]: EstadoPedido.Despachado,
+};
+
+const esActivo = (estado: EstadoPedido): boolean =>
+  estado !== EstadoPedido.Despachado && estado !== EstadoPedido.Cancelado;
+
 export class GestorPedidos {
   private readonly pedidos = new Map<string, Pedido>();
   private cola: Pedido[] = [];
@@ -24,7 +34,7 @@ export class GestorPedidos {
     }
     this.pedidos.set(pedido.id, pedido);
     this.historial.set(pedido.id, []);
-    if (pedido.estado === EstadoPedido.Nuevo) this.cola.push(pedido);
+    if (esActivo(pedido.estado)) this.cola.push(pedido);
     return pedido;
   }
 
@@ -34,19 +44,32 @@ export class GestorPedidos {
     return pedido;
   }
 
-  atenderSiguiente(): Pedido {
-    while (this.cabeza < this.cola.length && this.cola[this.cabeza].estado !== EstadoPedido.Nuevo) {
+  private limpiarCabeza(): void {
+    while (this.cabeza < this.cola.length && !esActivo(this.cola[this.cabeza].estado)) {
       this.cabeza++;
     }
-    if (this.cabeza >= this.cola.length) {
-      throw new ErrorDeNegocio('No hay pedidos pendientes de atención');
-    }
-    const pedido = this.cola[this.cabeza++];
     if (this.cabeza > 64 && this.cabeza * 2 >= this.cola.length) {
       this.cola = this.cola.slice(this.cabeza);
       this.cabeza = 0;
     }
-    this.cambiarEstado(pedido.id, EstadoPedido.Confirmado);
+  }
+
+  /** Atiende el pedido activo más antiguo en la cola FIFO hasta despacharlo. */
+  atenderSiguiente(): Pedido {
+    this.limpiarCabeza();
+    if (this.cabeza >= this.cola.length) {
+      throw new ErrorDeNegocio('No hay pedidos pendientes de atención');
+    }
+    const pedido = this.cola[this.cabeza];
+    const siguiente = SIGUIENTE_ESTADO[pedido.estado];
+    if (!siguiente) {
+      this.cabeza++;
+      return this.atenderSiguiente();
+    }
+    this.cambiarEstado(pedido.id, siguiente);
+    if (!esActivo(pedido.estado)) {
+      this.cabeza++;
+    }
     return pedido;
   }
 
@@ -60,17 +83,21 @@ export class GestorPedidos {
     return pedido;
   }
 
-  /** Restaura el estado anterior; no reinserta el pedido en la cola. */
+  /** Restaura el estado anterior; si vuelve a estar activo, asegura su lugar en la cola. */
   deshacerCambio(id: string): Pedido {
     const pedido = this.consultarPedido(id);
     const anterior = this.historial.get(id)!.pop();
     if (!anterior) throw new ErrorDeNegocio(`Pedido '${id}' no tiene cambios para deshacer`);
     pedido.estado = anterior;
+    if (esActivo(pedido.estado) && !this.cola.slice(this.cabeza).some((item) => item.id === pedido.id)) {
+      this.cola.push(pedido);
+    }
     return pedido;
   }
 
   pedidosPendientes(): Pedido[] {
-    return this.cola.slice(this.cabeza).filter((pedido) => pedido.estado === EstadoPedido.Nuevo);
+    this.limpiarCabeza();
+    return this.cola.slice(this.cabeza).filter((pedido) => esActivo(pedido.estado));
   }
 
   todosLosPedidos(): Pedido[] {

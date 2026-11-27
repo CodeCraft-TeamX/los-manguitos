@@ -65,7 +65,7 @@ export class Sistema {
 
     for (const cliente of datos.clientes) this.ventas.registrarCliente(cliente);
     for (const venta of datos.ventas) this.ventas.registrarVenta(venta);
-    for (const pedido of datos.pedidos) this.pedidos.registrarPedido(pedido);
+    for (const pedido of [...datos.pedidos].reverse()) this.pedidos.registrarPedido(pedido);
 
     for (const ubicacion of datos.ubicaciones) this.logistica.agregarNodo(ubicacion.id);
     for (const [origen, destino, distancia] of datos.conexiones) {
